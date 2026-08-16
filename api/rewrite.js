@@ -32,7 +32,7 @@ SHORT: 나도 내 일정이 있어서 계속 맞추기는 어려워.
 원문: ${message}`;
   try {
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', responseSchema: REWRITE_SCHEMA } }) });
-    if (!response.ok) { console.error('Gemini API error', response.status, await response.text()); throw new Error(`Gemini error: ${response.status}`); }
+    if (!response.ok) { const providerError = await response.text(); console.error('Gemini API error', response.status, providerError); return res.status(502).json({ error: 'AI 문장 분석에 실패했습니다.', providerStatus: response.status }); }
     const data = await response.json();
     const output = data.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('');
     return res.status(200).json(JSON.parse(output));
