@@ -20,6 +20,7 @@ module.exports = async (req, res) => {
 - note는 말투 차이를 설명하는 16자 이내 한국어다.
 - 존댓말/반말은 원문의 기본 말투를 따른다.
 - 결과는 반드시 한국어로 작성한다.
+- 설명, 마크다운 없이 아래 형태의 JSON만 반환한다: {"alternatives":[{"kind":"SOFT","note":"...","text":"..."},{"kind":"CLEAR","note":"...","text":"..."},{"kind":"SHORT","note":"...","text":"..."}]}.
 
 예시 (형식만 참고):
 원문: 너의 일정에만 내가 다 맞출 수는 없잖아! 너무한 거 아니야?
@@ -31,7 +32,7 @@ SHORT: 나도 내 일정이 있어서 계속 맞추기는 어려워.
 메시지 목적: ${purpose || '미입력'}
 원문: ${message}`;
   try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', responseSchema: REWRITE_SCHEMA } }) });
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY }, body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json' } }) });
     if (!response.ok) { const providerError = await response.text(); console.error('Gemini API error', response.status, providerError); return res.status(502).json({ error: 'AI 문장 분석에 실패했습니다.', providerStatus: response.status }); }
     const data = await response.json();
     const output = data.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('');
